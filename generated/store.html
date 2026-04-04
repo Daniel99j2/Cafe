@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Store</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<p id="_cartItems" hidden="hidden">Milo jatz </p>
+<script src="http://localhost:8080/password.js"></script>
+<script src="http://localhost:8080/notification.js"></script>
+<script src="http://localhost:8080/cart.js"></script>
+<script type="text/javascript">
+    window.addEventListener("load", () => {
+        login()
+        initCart()
+    });
+
+    async function purchase(event) {
+        document.getElementById("purchaseButton").disabled = true;
+        purchaseAllItems();
+    }
+</script>
+<script type="text/javascript"></script>
+<p>NOM NOM IN MAH TOM TOM</p>
+<h1>Cart</h1>
+<div class="cart" id="Cart"><div class="item" id="_cartItem_Milo" data-cost=2.5><p>Milo</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_Milo_Input"></div><div class="item" id="_cartItem_jatz" data-cost=1.0><p>jatz</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_jatz_Input"></div></div>
+<p id="_cartCost">Total Cost: $0.00</p>
+<script type="text/javascript">
+</script>
+<button onclick="purchase(event)" id="purchaseButton">Purchase</button>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Store</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<cartData></cartData>
+<script type="text/javascript">
+    currentSpinner = 0;
+    iter = 0;
+    textIter = 0;
+
+    function checkStatus() {
+        id = new URLSearchParams(window.location.search).get("id");
+        console.log("Checking status");
+
+        const request = new XMLHttpRequest();
+        request.open("GET", "api/order?id="+id);
+        request.onload = async function () {
+            if(request.status === 200) {
+                document.getElementById("_status").textContent = "Status: " + request.responseText;
+            } else {
+                document.getElementById("_status").textContent = "Error getting status";
+            }
+        }
+        request.send();
+    }
+
+    function makeSpinnerSwirl() {
+        currentSpinner++;
+        if(currentSpinner === 0) document.getElementById("_spinner").textContent = "Preparing order.";
+        else if(currentSpinner === 1) document.getElementById("_spinner").textContent = "Preparing order..";
+        else if(currentSpinner === 2) document.getElementById("_spinner").textContent = "Preparing order...";
+        else if(currentSpinner === 3) document.getElementById("_spinner").textContent = "Preparing order....";
+        else if(currentSpinner === 4) document.getElementById("_spinner").textContent = "Preparing order.....";
+        else {
+            currentSpinner = -1;
+            makeSpinnerSwirl();
+        }
+    }
+
+    window.addEventListener("load", () => {
+        setInterval(checkStatus, 5000)
+    });
+
+    setInterval(makeSpinnerSwirl, 500)
+</script>
+<script type="text/javascript"></script>
+<p>NOM NOM IN MAH TOM TOM</p>
+<h1>Your order</h1>
+<p id="_status">Status: PENDING</p>
+<p id="_spinner">Preparing order.</p>
+<script type="text/javascript">
+</script>
+</body>
+</html>

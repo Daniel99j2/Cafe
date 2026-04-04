@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Store</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<cartData></cartData>
+<script src="%base%/password.js"></script>
+<script src="%base%/notification.js"></script>
+<script src="%base%/cart.js"></script>
+<script type="text/javascript">
+    window.addEventListener("load", () => {
+        login()
+        initCart()
+    });
+
+    async function purchase(event) {
+        document.getElementById("purchaseButton").disabled = true;
+        purchaseAllItems();
+    }
+</script>
+<script type="text/javascript"></script>
+<p>NOM NOM IN MAH TOM TOM</p>
+<h1>Cart</h1>
+<items></items>
+<p id="_cartCost">Total Cost: $0.00</p>
+<script type="text/javascript">
+</script>
+<button onclick="purchase(event)" id="purchaseButton">Purchase</button>
+</body>
+</html>
