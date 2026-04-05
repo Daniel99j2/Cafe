@@ -19,7 +19,7 @@ public class CartDataElement extends ElementParser {
         StringBuilder values = new StringBuilder();
 
         for (String addition : additions) {
-            values.append(addition).append(" ");
+            values.append(addition).append("\n");
         }
         file = file.replace("<cartData></cartData>", "<p id=\"_cartItems\" hidden=\"hidden\">"+values+"</p>");
         return file;

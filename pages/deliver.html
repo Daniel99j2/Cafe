@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Store</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<script src="%base%/password.js"></script>
+<script type="text/javascript">
+    done = false;
+
+    window.addEventListener("load", () => {
+        login()
+        setInterval(checkStatus, 5000)
+        checkStatus();
+        reloadItemList();
+        document.getElementById("_deliveryItems").addEventListener("click", () => {
+            reloadItemList()
+        });
+    });
+
+    function reloadItemList() {
+        allTicked = true;
+        document.querySelectorAll('input').forEach(element => {
+            if(element.dataset.deliveryitem === "true" && !element.checked) allTicked = false;
+        });
+
+        if(!allTicked) document.getElementById("startDelivery").disabled = true
+        else document.getElementById("startDelivery").disabled = null;
+    }
+
+    function checkStatus() {
+        if(done) return;
+        id = new URLSearchParams(window.location.search).get("id");
+        console.log("Checking status");
+
+        const request = new XMLHttpRequest();
+        request.open("GET", "api/order?id="+id);
+        request.onload = async function () {
+            if(request.status === 200) {
+                document.getElementById("_status").textContent = "Status: " + request.responseText.split(":")[0];
+                document.getElementById("_status").dataset.status = request.responseText.split(":")[0];
+                updateVisibility();
+            } else {
+                document.getElementById("_status").textContent = "Error getting status";
+                document.getElementById("_status").dataset.status = "ERROR";
+            }
+        }
+        request.send();
+    }
+
+    function updateVisibility() {
+        if(done) return;
+        status = document.getElementById("_status").dataset.status;
+        document.querySelectorAll('*').forEach(element => {
+            if(element.dataset.basedonstatus === "true") {
+                element.dataset.oldstyle = element.style
+                element.style = "content-visibility:hidden;";
+            }
+        });
+        if(status === "SENDING") {
+            show("step1")
+        } else if(status === "PREPARING") {
+            show("step2")
+        } else if(status === "DELIVERING") {
+            show("step3")
+        } else if(status === "SOLD") {
+            show("step4")
+        }
+    }
+
+    function show(elementId) {
+        element = document.getElementById(elementId);
+        if(element.dataset.basedonstatus === "true" && element.style != null) {
+            element.style = element.dataset.oldstyle;
+        }
+    }
+
+    async function nextMode() {
+        const request = new XMLHttpRequest();
+        request.open("PUT", "api/deliver?id="+id);
+        request.onload = async function () {
+            checkStatus();
+        }
+        request.send();
+    }
+
+    async function acceptDelivery(event) {
+        nextMode()
+        //document.getElementById("deliver").disabled = true;
+        //document.getElementById("deny").disabled = true;
+        //document.getElementById("step1").style = "content-visibility:hidden;";
+        //document.getElementById("step2").style = null;
+    }
+
+    function denyDelivery(event) {
+        document.getElementById("denyModal").style.display = "flex";
+    }
+
+    function cancelDeny() {
+        document.getElementById("denyModal").style.display = "none";
+        document.getElementById("denyMessage").value = "";
+    }
+
+    function confirmDeny() {
+        const message = document.getElementById("denyMessage").value;
+
+        const request = new XMLHttpRequest();
+        const id = new URLSearchParams(window.location.search).get("id");
+        request.open("DELETE", "api/deliver?id=" + id);
+        request.setRequestHeader("FailReason", message)
+        request.onload = async function () {
+            if (request.status === 200) {
+                checkStatus()
+                done = true;
+            } else {
+                alert("Error denying delivery");
+            }
+        }
+        request.send();
+
+        document.getElementById("accept").disabled = true;
+        document.getElementById("deny").disabled = true;
+
+        // Close modal
+        cancelDeny();
+    }
+</script>
+<p>NOM NOM IN MAH TOM TOM</p>
+<h1>Delivering</h1>
+<p id="_status">Status: PENDING</p>
+<h3>Step 1: do you wanna do it</h3>
+<div style="content-visibility:hidden;" id="step1" data-basedOnStatus="true">
+    <button id="accept" onclick="acceptDelivery(event)" class="greenbutton">Accept</button>
+    <button id="deny" onclick="denyDelivery(event)" class="redbutton">Deny</button>
+</div>
+<h3>Step 2: Prepare food</h3>
+<div style="content-visibility:hidden;" id="step2" data-basedOnStatus="true">
+    <p>Checklist:</p>
+    <deliveryitems></deliveryitems>
+    <button id="startDelivery" onclick="nextMode()" class="greenbutton">Deliver Food</button>
+</div>
+<h3>Step 3: Deliver</h3>
+<div style="content-visibility:hidden;" id="step3" data-basedOnStatus="true">
+    <p>Deliver pls:</p>
+</div>
+<h3>Step 4: Review</h3>
+<div style="content-visibility:hidden;" id="step4" data-basedOnStatus="true">
+    <p>You got ⭐⭐⭐▪️▪️</p>
+</div>
+
+<div id="denyModal" class="popup" style="display:none;">
+    <div  class="popup-inner" style="padding:20px; border-radius:8px; max-width:400px; width:80%;">
+        <h2>Deny Delivery</h2>
+        <label>Please specify a reason for denying:<input type="text" id="denyMessage" style="width:100%;" autofocus></label>
+        <div style="margin-top:10px; text-align:right;">
+            <button onclick="cancelDeny()" class="greybutton">Cancel</button>
+            <button onclick="confirmDeny()" class="redbutton">Confirm</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

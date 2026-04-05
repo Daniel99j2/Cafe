@@ -6,13 +6,23 @@
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-<p id="_cartItems" hidden="hidden"></p>
 <script type="text/javascript">
     currentSpinner = 0;
     iter = 0;
     textIter = 0;
+    done = false;
+
+    function cancelOrder() {
+        const request = new XMLHttpRequest();
+        request.open("DELETE", "api/deliver?id="+id);
+        request.onload = async function () {
+            checkStatus()
+        }
+        request.send();
+    }
 
     function checkStatus() {
+        if(done) return;
         id = new URLSearchParams(window.location.search).get("id");
         console.log("Checking status");
 
@@ -20,21 +30,47 @@
         request.open("GET", "api/order?id="+id);
         request.onload = async function () {
             if(request.status === 200) {
-                document.getElementById("_status").textContent = "Status: " + request.responseText;
+                if(request.responseText.split(":")[1] === "AUTHORIZED" && request.responseText.split(":")[0] === "SENDING") {
+                    document.getElementById("_cancelOrder").disabled = null;
+                } else {
+                    document.getElementById("_cancelOrder").disabled = true;
+                }
+                document.getElementById("_status").textContent = "Status: " + request.responseText.split(":")[0];
+                document.getElementById("_status").dataset.status = request.responseText.split(":")[0];
+
+                if(request.responseText.split(":")[0] === "FAILED") {
+                    document.getElementById("_failReason").textContent = "Fail reason: \"" +request.responseText.split(":")[2] + "\""
+                    document.getElementById("_failReason").hidden = null
+                }
+
+                if(request.responseText.split(":")[0] === "CANCELLED" || request.responseText.split(":")[0] === "FAILED" || request.responseText.split(":")[0] === "SOLD") {
+                    done = true
+                    document.getElementById("_spinner").textContent = "Order complete"
+                };
             } else {
                 document.getElementById("_status").textContent = "Error getting status";
+                document.getElementById("_status").dataset.status = "ERROR";
             }
+        }
+        request.onerror = async function () {
+            document.getElementById("_status").textContent = "Error getting status";
+            document.getElementById("_status").dataset.status = "ERROR";
         }
         request.send();
     }
 
     function makeSpinnerSwirl() {
+        if(done) return;
         currentSpinner++;
-        if(currentSpinner === 0) document.getElementById("_spinner").textContent = "Preparing order.";
-        else if(currentSpinner === 1) document.getElementById("_spinner").textContent = "Preparing order..";
-        else if(currentSpinner === 2) document.getElementById("_spinner").textContent = "Preparing order...";
-        else if(currentSpinner === 3) document.getElementById("_spinner").textContent = "Preparing order....";
-        else if(currentSpinner === 4) document.getElementById("_spinner").textContent = "Preparing order.....";
+        baseText = "Loading"
+        if(document.getElementById("_status").dataset.status === "SENDING") baseText = "Sending order"
+        if(document.getElementById("_status").dataset.status === "PREPARING") baseText = "Preparing order"
+        if(document.getElementById("_status").dataset.status === "DELIVERING") baseText = "Delivering order"
+        if(currentSpinner === 0) document.getElementById("_spinner").textContent = baseText + ".";
+        else if(currentSpinner === 1) document.getElementById("_spinner").textContent = baseText + "..";
+        else if(currentSpinner === 2) document.getElementById("_spinner").textContent = baseText + "...";
+        else if(currentSpinner === 3) document.getElementById("_spinner").textContent = baseText + "....";
+        else if(currentSpinner === 4) document.getElementById("_spinner").textContent = baseText + ".....";
         else {
             currentSpinner = -1;
             makeSpinnerSwirl();
@@ -43,6 +79,7 @@
 
     window.addEventListener("load", () => {
         setInterval(checkStatus, 5000)
+        checkStatus();
     });
 
     setInterval(makeSpinnerSwirl, 500)
@@ -51,7 +88,9 @@
 <p>NOM NOM IN MAH TOM TOM</p>
 <h1>Your order</h1>
 <p id="_status">Status: PENDING</p>
+<p id="_failReason" hidden="hidden">Fail Reason</p>
 <p id="_spinner">Preparing order.</p>
+<button class="redbutton" id="_cancelOrder" onclick="cancelOrder()" disabled>Cancel Order</button>
 <script type="text/javascript">
 </script>
 </body>

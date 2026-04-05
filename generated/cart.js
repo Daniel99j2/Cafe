@@ -2,7 +2,7 @@ function getCart() {
     let elementNames = document.getElementById("_cartItems").textContent;
     let cart = [];
     totalCost = 0;
-    for (let name of elementNames.split(" ")) {
+    for (let name of elementNames.split("\n")) {
         if(name == " " || name == "" || name == null) continue;
         elementName = "_cartItem_"+name;
         console.log(elementName);
@@ -18,7 +18,9 @@ function getCart() {
         currency: 'USD',
     });
     document.getElementById("_cartCost").textContent = "Total Cost: "+formatter.format(totalCost);
-    return {cart: cart, totalCost: totalCost};
+    if(totalCost > 0) document.getElementById("purchaseButton").disabled = null
+    else document.getElementById("purchaseButton").disabled = true;
+    return {cart: cart, totalCost: totalCost, deliveryLocation: document.getElementById("deliveryLocation").value};
 }
 
 function initCart() {

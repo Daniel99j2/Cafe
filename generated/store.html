@@ -6,7 +6,11 @@
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-<p id="_cartItems" hidden="hidden">Milo jatz </p>
+<p id="_cartItems" hidden="hidden">1kg Gold Bar
+Yuzu drink
+Milo
+jatz
+</p>
 <script src="http://localhost:8080/password.js"></script>
 <script src="http://localhost:8080/notification.js"></script>
 <script src="http://localhost:8080/cart.js"></script>
@@ -24,10 +28,14 @@
 <script type="text/javascript"></script>
 <p>NOM NOM IN MAH TOM TOM</p>
 <h1>Cart</h1>
-<div class="cart" id="Cart"><div class="item" id="_cartItem_Milo" data-cost=2.5><p>Milo</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_Milo_Input"></div><div class="item" id="_cartItem_jatz" data-cost=1.0><p>jatz</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_jatz_Input"></div></div>
-<p id="_cartCost">Total Cost: $0.00</p>
+<form onsubmit="purchase(event)">
+    <div class="cart" id="Cart"><div class="item" id="_cartItem_1kg Gold Bar" data-cost=222000.0><p>1kg Gold Bar</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_1kg Gold Bar_Input"></div><div class="item" id="_cartItem_Yuzu drink" data-cost=3.0><p>Yuzu drink</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_Yuzu drink_Input"></div><div class="item" id="_cartItem_Milo" data-cost=2.5><p>Milo</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_Milo_Input"></div><div class="item" id="_cartItem_jatz" data-cost=1.0><p>jatz</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_jatz_Input"></div></div>
+    <p id="_cartCost">Total Cost: $0.00</p>
+    <label>Delivery Location: <input type="text" id="deliveryLocation" required></label>
+    <br>
+    <input type="submit" id="purchaseButton" value="Purchase" class="greenbutton">
+</form>
 <script type="text/javascript">
 </script>
-<button onclick="purchase(event)" id="purchaseButton">Purchase</button>
 </body>
 </html>

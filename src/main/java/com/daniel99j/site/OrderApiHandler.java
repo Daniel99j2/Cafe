@@ -3,30 +3,22 @@ package com.daniel99j.site;
 import com.daniel99j.User;
 import com.daniel99j.UserLoader;
 import com.daniel99j.ordering.Order;
-import com.daniel99j.ordering.OrderItem;
 import com.daniel99j.ordering.OrderManager;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.UUID;
 
-public class PurchaseHandler implements HttpHandler {
+public class OrderApiHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-            User user = UserLoader.login(exchange);
-
-            ArrayList<OrderItem> items = new ArrayList<>();
-
-            JsonObject object = JsonParser.parseString(data).getAsJsonObject();
-
-            Order order = new Order(0, items, user, UserLoader.getUser("Hugo"));
-
-            OrderManager.addOrder(order);
-
-            String response = "http://localhost:8080/order?id="+order.uuid.toString();
+            User user = UserLoader.loginOrNull(exchange);
+            UUID id = UUID.fromString(exchange.getRequestURI().toString().replace("/api/order?id=", ""));
+            Order o = OrderManager.orders.stream().filter((order -> order.uuid.equals(id))).findFirst().orElse(null);
+            String response = o.status.toString() + ":" + (o.orderer == user ? "AUTHORIZED" : "DENIED") + ":" + o.failReason;
 
             exchange.sendResponseHeaders(200, response.getBytes().length);
 
@@ -35,7 +27,7 @@ public class PurchaseHandler implements HttpHandler {
             }
         } catch (Exception e) {
             String response = "Bad Request";
-            exchange.sendResponseHeaders(400, response.getBytes().length);
+            exchange.sendResponseHeaders(500, response.getBytes().length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());
             }

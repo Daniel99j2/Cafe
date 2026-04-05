@@ -16,15 +16,22 @@ public class OrderManager {
             items.append(item.item.name);
             items.append("\n");
         }
+        long discordTimestamp = order.currentStatusExpiry.getEpochSecond();
         WebhookSender.sendMessage("""
                 <@discordId>
                 Order requested by orderer.
+                Location: "place"
+                Cart:
+                ```
                 items
-                [View order](http://localhost:8080/order?id=uuid)
-                This expires in <t:10:R>"""
+                ```
+                [View order](http://localhost:8080/deliver?id=uuid)
+                This expires <t:time:R>"""
                 .replace("uuid", order.uuid.toString())
                 .replace("orderer", order.orderer.name)
                 .replace("discordId", String.valueOf(order.deliverer.discordId))
+                .replace("time", String.valueOf(discordTimestamp))
+                .replace("place", order.deliveryLocation)
                 .replace("items", items.toString()));
     }
 }

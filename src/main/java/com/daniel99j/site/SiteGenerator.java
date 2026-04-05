@@ -10,14 +10,20 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SiteGenerator {
+    public static Map<String, String> customPages = new HashMap<>();
+
     public static void load(HttpServer server) {
         try {
             Files.list(Paths.get("pages").toAbsolutePath()).forEach((p) -> {
                 try {
                     GeneratedHandler handler = new GeneratedHandler(Files.readString(p));
-                    server.createContext("/"+p.getFileName().toString().replace(".html", ""), handler);
+                    if(!p.getFileName().toString().equals("deliver.html")) server.createContext("/"+p.getFileName().toString().replace(".html", ""), handler);
+                    else customPages.put(p.getFileName().toString(), handler.page);
+
                     Path path = Path.of("generated/" + p.getFileName());
                     Files.createDirectories(path.getParent());
                     Files.deleteIfExists(path);
@@ -58,5 +64,34 @@ public class SiteGenerator {
                 os.write(page.getBytes());
             }
         }
+    }
+
+    public static String login() {
+        return """
+                <html>
+                <body>
+                <script src="http://localhost:8080/password.js"></script>
+                <script type="text/javascript">
+                    window.addEventListener("load", () => {
+                       login();
+                    });
+                </script>
+                </body>
+                </html>
+                """;
+    }
+
+    public static String redirect(String url) {
+        return """
+                <html>
+                <body>
+                <script type="text/javascript">
+                    window.addEventListener("load", () => {
+                        window.location.replace("url");
+                    });
+                </script>
+                </body>
+                </html>
+                """.replace("url", url);
     }
 }

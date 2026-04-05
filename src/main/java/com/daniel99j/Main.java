@@ -1,18 +1,13 @@
 package com.daniel99j;
 
+import com.daniel99j.site.DeliverApiHandler;
 import com.daniel99j.ordering.LoginHandler;
-import com.daniel99j.ordering.OrderHandler;
+import com.daniel99j.site.OrderApiHandler;
 import com.daniel99j.site.*;
 import com.sun.net.httpserver.*;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.awt.*;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.security.KeyStore;
 import java.util.UUID;
 
 public class Main {
@@ -43,9 +38,11 @@ public class Main {
 //        }
         SiteGenerator.load(server);
 
-        server.createContext("/api/purchase", new PurchaseHandler());
+        server.createContext("/api/purchase", new PurchaseApiHandler());
         server.createContext("/api/login", new LoginHandler());
-        server.createContext("/api/order", new OrderHandler());
+        server.createContext("/api/order", new OrderApiHandler());
+        server.createContext("/api/deliver", new DeliverApiHandler());
+        server.createContext("/deliver", new DeliverHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port 8080");

@@ -24,10 +24,14 @@
 <script type="text/javascript"></script>
 <p>NOM NOM IN MAH TOM TOM</p>
 <h1>Cart</h1>
-<items></items>
-<p id="_cartCost">Total Cost: $0.00</p>
+<form onsubmit="purchase(event)">
+    <items></items>
+    <p id="_cartCost">Total Cost: $0.00</p>
+    <label>Delivery Location: <input type="text" id="deliveryLocation" required></label>
+    <br>
+    <input type="submit" id="purchaseButton" value="Purchase" class="greenbutton">
+</form>
 <script type="text/javascript">
 </script>
-<button onclick="purchase(event)" id="purchaseButton">Purchase</button>
 </body>
 </html>

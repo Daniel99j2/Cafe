@@ -14,6 +14,14 @@ public class UserLoader {
         return users.stream().filter(user -> user.name.equals(name)).findFirst().orElse(null);
     }
 
+    public static User loginOrNull(HttpExchange exchange) {
+        try {
+            return login(exchange);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static User login(HttpExchange exchange) throws IllegalAccessException {
         return login(getCookieValue(exchange.getRequestHeaders().getFirst("Cookie"), "user"), getCookieValue(exchange.getRequestHeaders().getFirst("Cookie"), "password"));
     }
