@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <title>Store</title>
     <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
 </head>
 <body>
-<p id="_cartItems" hidden="hidden">1kg Gold Bar
+<p id="_cartItems" hidden="hidden">Milo
+Hot Milo
+Jatz
+1kg Gold Bar
 Yuzu drink
-Milo
-jatz
+Chocolate Milk
 </p>
 <script src="http://localhost:8080/password.js"></script>
-<script src="http://localhost:8080/notification.js"></script>
 <script src="http://localhost:8080/cart.js"></script>
 <script type="text/javascript">
     window.addEventListener("load", () => {
@@ -24,18 +26,68 @@ jatz
         document.getElementById("purchaseButton").disabled = true;
         purchaseAllItems();
     }
+
+    let holdTimeouts = {};
+
+    function updateItemQuantity(id, delta) {
+        const input = document.getElementById(id);
+        let value = parseInt(input.value);
+        value = Math.max(input.min, Math.min(input.max, value + delta));
+        input.value = value;
+        getCart();
+    }
+
+    function startHold(id, delta) {
+        if (!holdTimeouts[id]) {
+            updateItemQuantity(id, delta)
+            holdTimeouts[id] = setInterval(() => updateItemQuantity(id, delta), 200); //200ms
+        }
+    }
+
+    function stopHold(id) {
+        clearInterval(holdTimeouts[id]);
+        delete holdTimeouts[id];
+    }
+
 </script>
 <script type="text/javascript"></script>
-<p>NOM NOM IN MAH TOM TOM</p>
+<script type="text/javascript">
+    function openHomePage() {
+        window.location.href = "http://localhost:8080/"
+    }
+</script>
+<p style="color: orangered; cursor: pointer;" onclick='openHomePage()'>NOM NOM IN MAH TOM TOM</p>
+
 <h1>Cart</h1>
 <form onsubmit="purchase(event)">
-    <div class="cart" id="Cart"><div class="item" id="_cartItem_1kg Gold Bar" data-cost=222000.0><p>1kg Gold Bar</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_1kg Gold Bar_Input"></div><div class="item" id="_cartItem_Yuzu drink" data-cost=3.0><p>Yuzu drink</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_Yuzu drink_Input"></div><div class="item" id="_cartItem_Milo" data-cost=2.5><p>Milo</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_Milo_Input"></div><div class="item" id="_cartItem_jatz" data-cost=1.0><p>jatz</p><input name="test" type="number" max="10" min="0" value="0" id="_cartItem_jatz_Input"></div></div>
+    <div class="cart" id="Cart">
+<div class="item" id="_cartItem_Milo" data-cost=2.5><p>Milo</p><button class="moreless" type="button" onmousedown="startHold('_cartItem_Milo_Input', -1)" onmouseup="stopHold('_cartItem_Milo_Input')" onmouseleave="stopHold('_cartItem_Milo_Input')">-</button><input class="itemamount" name="milo" type="number" max="10" min="0" value="0" id="_cartItem_Milo_Input"><button class="moreless" type="button" onmousedown="startHold('_cartItem_Milo_Input', 1)" onmouseup="stopHold('_cartItem_Milo_Input')" onmouseleave="stopHold('_cartItem_Milo_Input')">+</button></div>
+<div class="item" id="_cartItem_Hot Milo" data-cost=2.5><p>↳ Hot Milo</p><button class="moreless" type="button" onmousedown="startHold('_cartItem_Hot Milo_Input', -1)" onmouseup="stopHold('_cartItem_Hot Milo_Input')" onmouseleave="stopHold('_cartItem_Hot Milo_Input')">-</button><input class="itemamount" name="hot_milo" type="number" max="10" min="0" value="0" id="_cartItem_Hot Milo_Input"><button class="moreless" type="button" onmousedown="startHold('_cartItem_Hot Milo_Input', 1)" onmouseup="stopHold('_cartItem_Hot Milo_Input')" onmouseleave="stopHold('_cartItem_Hot Milo_Input')">+</button></div>
+<div class="item" id="_cartItem_Jatz" data-cost=0.1><p>Jatz</p><button class="moreless" type="button" onmousedown="startHold('_cartItem_Jatz_Input', -1)" onmouseup="stopHold('_cartItem_Jatz_Input')" onmouseleave="stopHold('_cartItem_Jatz_Input')">-</button><input class="itemamount" name="jatz" type="number" max="10" min="0" value="0" id="_cartItem_Jatz_Input"><button class="moreless" type="button" onmousedown="startHold('_cartItem_Jatz_Input', 1)" onmouseup="stopHold('_cartItem_Jatz_Input')" onmouseleave="stopHold('_cartItem_Jatz_Input')">+</button></div>
+<div class="item" id="_cartItem_1kg Gold Bar" data-cost=222000.0><p>1kg Gold Bar</p><button class="moreless" type="button" onmousedown="startHold('_cartItem_1kg Gold Bar_Input', -1)" onmouseup="stopHold('_cartItem_1kg Gold Bar_Input')" onmouseleave="stopHold('_cartItem_1kg Gold Bar_Input')">-</button><input class="itemamount" name="1kg_gold_bar" type="number" max="10" min="0" value="0" id="_cartItem_1kg Gold Bar_Input"><button class="moreless" type="button" onmousedown="startHold('_cartItem_1kg Gold Bar_Input', 1)" onmouseup="stopHold('_cartItem_1kg Gold Bar_Input')" onmouseleave="stopHold('_cartItem_1kg Gold Bar_Input')">+</button></div>
+<div class="item" id="_cartItem_Yuzu drink" data-cost=3.0><p>Yuzu drink</p><button class="moreless" type="button" onmousedown="startHold('_cartItem_Yuzu drink_Input', -1)" onmouseup="stopHold('_cartItem_Yuzu drink_Input')" onmouseleave="stopHold('_cartItem_Yuzu drink_Input')">-</button><input class="itemamount" name="yuzu_drink" type="number" max="10" min="0" value="0" id="_cartItem_Yuzu drink_Input"><button class="moreless" type="button" onmousedown="startHold('_cartItem_Yuzu drink_Input', 1)" onmouseup="stopHold('_cartItem_Yuzu drink_Input')" onmouseleave="stopHold('_cartItem_Yuzu drink_Input')">+</button></div>
+<div class="item" id="_cartItem_Chocolate Milk" data-cost=2.0><p>Chocolate Milk</p><button class="moreless" type="button" onmousedown="startHold('_cartItem_Chocolate Milk_Input', -1)" onmouseup="stopHold('_cartItem_Chocolate Milk_Input')" onmouseleave="stopHold('_cartItem_Chocolate Milk_Input')">-</button><input class="itemamount" name="chocolate_milk" type="number" max="10" min="0" value="0" id="_cartItem_Chocolate Milk_Input"><button class="moreless" type="button" onmousedown="startHold('_cartItem_Chocolate Milk_Input', 1)" onmouseup="stopHold('_cartItem_Chocolate Milk_Input')" onmouseleave="stopHold('_cartItem_Chocolate Milk_Input')">+</button></div></div>
     <p id="_cartCost">Total Cost: $0.00</p>
+    <p id="_estimatedTime">Estimated Time: --:--</p>
     <label>Delivery Location: <input type="text" id="deliveryLocation" required></label>
+    <label for="users">Deliverer:</label>
+<select id="users" name="Users" required>
+    <option value="null" disabled selected>--Select a delivery option--</option>
+<option value="Daniel">Daniel</option>
+<option value="Hugo">Hugo</option>
+</select>
     <br>
-    <input type="submit" id="purchaseButton" value="Purchase" class="greenbutton">
+    <p id="_error" style="color: red" hidden>Error</p>
+    <input type="submit" id="purchaseButton" value="Purchase" class="purchasebutton" disabled>
 </form>
 <script type="text/javascript">
+    function openProfile() {
+        window.location.href = "http://localhost:8080/account"
+    }
 </script>
+<div style="display: block; position:fixed; top:10px; right:20px;">
+    <p onclick='openProfile()' style="cursor: pointer;">👤</p>
+</div>
+
 </body>
 </html>

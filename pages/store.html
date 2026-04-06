@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>Store</title>
     <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
 </head>
 <body>
 <cartData></cartData>
 <script src="%base%/password.js"></script>
-<script src="%base%/notification.js"></script>
 <script src="%base%/cart.js"></script>
 <script type="text/javascript">
     window.addEventListener("load", () => {
@@ -20,18 +20,43 @@
         document.getElementById("purchaseButton").disabled = true;
         purchaseAllItems();
     }
+
+    let holdTimeouts = {};
+
+    function updateItemQuantity(id, delta) {
+        const input = document.getElementById(id);
+        let value = parseInt(input.value);
+        value = Math.max(input.min, Math.min(input.max, value + delta));
+        input.value = value;
+        getCart();
+    }
+
+    function startHold(id, delta) {
+        if (!holdTimeouts[id]) {
+            updateItemQuantity(id, delta)
+            holdTimeouts[id] = setInterval(() => updateItemQuantity(id, delta), 200); //200ms
+        }
+    }
+
+    function stopHold(id) {
+        clearInterval(holdTimeouts[id]);
+        delete holdTimeouts[id];
+    }
+
 </script>
 <script type="text/javascript"></script>
-<p>NOM NOM IN MAH TOM TOM</p>
+<sitetitle></sitetitle>
 <h1>Cart</h1>
 <form onsubmit="purchase(event)">
     <items></items>
     <p id="_cartCost">Total Cost: $0.00</p>
+    <p id="_estimatedTime">Estimated Time: --:--</p>
     <label>Delivery Location: <input type="text" id="deliveryLocation" required></label>
+    <users></users>
     <br>
-    <input type="submit" id="purchaseButton" value="Purchase" class="greenbutton">
+    <p id="_error" style="color: red" hidden>Error</p>
+    <input type="submit" id="purchaseButton" value="Purchase" class="purchasebutton" disabled>
 </form>
-<script type="text/javascript">
-</script>
+<usericon></usericon>
 </body>
 </html>

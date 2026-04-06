@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <link rel="stylesheet" href="main.css">
 </head>
 <script src="%base%/password.js"></script>
 <script type="text/javascript">
@@ -12,33 +13,25 @@
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
-        await setPassword(username, btoa(password));
+        data = {username: username, password: btoa(password)};
 
         const request = new XMLHttpRequest();
-        //try {
-            request.open("POST", "api/login");
+            request.open("PUT", "api/login");
             request.onload = async function () {
                 if(request.status === 200) {
-                    await setPassword(username, btoa(password));
-
                     window.location.replace(new URLSearchParams(window.location.search).get("redirect"));
                 } else if(request.status === 401) {
                     document.getElementById("error").textContent = "Invalid Credentials";
-                    await setPassword(null, "");
                 } else {
                     document.getElementById("error").textContent = "Something went wrong";
-                    await setPassword(null, "");
                 }
             }
-            request.send();
-        //} catch (error) {
-        //    console.error(`XHR error ${request.status}`);
-        //}
+            request.send(JSON.stringify(data));
     }
 </script>
 
 <body>
-<p>Please login</p>
+<h1>Please login</h1>
 <form onSubmit="login(event)">
     <input type="text" name="username" id="username" placeholder="Username" autocomplete="username">
     <input type="password" name="password" id="password" placeholder="Password" autocomplete="password">

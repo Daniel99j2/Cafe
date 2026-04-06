@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delivery</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
+</head>
+<body>
+<script src="%base%/password.js"></script>
+<script type="text/javascript">
+    done = false;
+    intervalId = null;
+
+    window.addEventListener("load", () => {
+        login()
+        id = new URLSearchParams(window.location.search).get("id");
+        const request = new XMLHttpRequest();
+        request.open("GET", "api/order?id="+id);
+        request.onload = async function () {
+            if(request.status === 200) {
+                json = JSON.parse(request.responseText);
+                if(json.deliverer) {
+                    window.location.replace(window.location.href.replace("vieworder", "deliver"));
+                } else {
+                    window.location.replace(window.location.href.replace("vieworder", "order"));
+                }
+            } else {
+                alert('Error redirecting')
+            }
+        }
+        request.send();
+    });
+</script>
+</body>
+</html>

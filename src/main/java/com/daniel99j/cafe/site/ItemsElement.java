@@ -1,6 +1,6 @@
-package com.daniel99j.site;
+package com.daniel99j.cafe.site;
 
-import com.daniel99j.Items;
+import com.daniel99j.cafe.Items;
 
 import java.util.concurrent.atomic.AtomicReference;
 

@@ -1,9 +1,8 @@
-package com.daniel99j.site;
+package com.daniel99j.cafe.site;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsServer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,15 +19,20 @@ public class SiteGenerator {
         try {
             Files.list(Paths.get("pages").toAbsolutePath()).forEach((p) -> {
                 try {
-                    GeneratedHandler handler = new GeneratedHandler(Files.readString(p));
-                    if(!p.getFileName().toString().equals("deliver.html")) server.createContext("/"+p.getFileName().toString().replace(".html", ""), handler);
-                    else customPages.put(p.getFileName().toString(), handler.page);
+                    if(!p.getFileName().toString().endsWith(".png")) {
+                        GeneratedHandler handler = new GeneratedHandler(Files.readString(p));
+                        if(!p.getFileName().toString().equals("deliver.html") && !p.getFileName().toString().equals("not_found.html")) server.createContext("/"+p.getFileName().toString().replace(".html", ""), handler);
+                        else customPages.put(p.getFileName().toString(), new String(handler.page));
 
-                    Path path = Path.of("generated/" + p.getFileName());
-                    Files.createDirectories(path.getParent());
-                    Files.deleteIfExists(path);
-                    Files.createFile(path);
-                    Files.write(path, handler.page.getBytes());
+                        Path path = Path.of("generated/" + p.getFileName());
+                        Files.createDirectories(path.getParent());
+                        Files.deleteIfExists(path);
+                        Files.createFile(path);
+                        Files.write(path, handler.page);
+                    } else {
+                        GeneratedHandler handler = new GeneratedHandler(Files.readAllBytes(p), false);
+                        server.createContext("/"+p.getFileName().toString(), handler);
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -39,29 +43,36 @@ public class SiteGenerator {
     }
 
     private static class GeneratedHandler implements HttpHandler {
-        public final String page;
+        public final byte[] page;
 
         GeneratedHandler(String page) {
-            page = page.replace("%base%/", "http://localhost:8080/").replace("%base%", "https://localhost:8080/");
-            while (true) {
-                String old = page;
-                for (ElementParser elementParser : ElementParser.elementParsers) {
-                    page = elementParser.parseFile(page);
+            this(page.getBytes(), true);
+        }
+
+        GeneratedHandler(byte[] page, boolean fixup) {
+            if(fixup) {
+                String stringPage = new String(page);
+                while (true) {
+                    stringPage = stringPage.replace("%base%/", "http://localhost:8080/").replace("%base%", "http://localhost:8080/");
+                    String old = stringPage;
+                    for (ElementParser elementParser : ElementParser.elementParsers) {
+                        stringPage = elementParser.parseFile(stringPage);
+                    }
+                    if (stringPage.equals(old)) break;
                 }
-                if(page.equals(old)) break;
-            }
-            this.page = page;
+                this.page = stringPage.getBytes();
+            } else this.page = page;
         }
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             // Send HTTP 200 OK and specify response length
 
-            exchange.sendResponseHeaders(200, page.getBytes().length);
+            exchange.sendResponseHeaders(200, page.length);
 
             // Write the response body
             try (OutputStream os = exchange.getResponseBody()) {
-                os.write(page.getBytes());
+                os.write(page);
             }
         }
     }
@@ -79,6 +90,10 @@ public class SiteGenerator {
                 </body>
                 </html>
                 """;
+    }
+
+    public static String not_found() {
+        return customPages.get("not_found.html");
     }
 
     public static String redirect(String url) {

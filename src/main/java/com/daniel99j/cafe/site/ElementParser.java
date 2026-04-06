@@ -1,4 +1,4 @@
-package com.daniel99j.site;
+package com.daniel99j.cafe.site;
 
 import java.util.ArrayList;
 

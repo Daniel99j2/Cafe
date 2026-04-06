@@ -2,17 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Store</title>
+    <title>Delivery</title>
     <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
 </head>
 <body>
 <script src="http://localhost:8080/password.js"></script>
 <script type="text/javascript">
     done = false;
+    intervalId = null;
 
     window.addEventListener("load", () => {
         login()
-        setInterval(checkStatus, 5000)
+        intervalId = setInterval(checkStatus, 1000)
         checkStatus();
         reloadItemList();
         document.getElementById("_deliveryItems").addEventListener("click", () => {
@@ -39,15 +41,50 @@
         request.open("GET", "api/order?id="+id);
         request.onload = async function () {
             if(request.status === 200) {
-                document.getElementById("_status").textContent = "Status: " + request.responseText.split(":")[0];
-                document.getElementById("_status").dataset.status = request.responseText.split(":")[0];
+                json = JSON.parse(request.responseText);
+                if(!json.deliverer) {
+                    clearInterval(intervalId);
+                    document.getElementById("startDelivery").disabled = true;
+                    fetch('http://localhost:8080/no_permission')
+                        .then(response => response.text())
+                        .then(data => {
+                            let newDoc = new DOMParser().parseFromString(data, 'text/html');
+                            document.documentElement.innerHTML = newDoc.documentElement.innerHTML;
+                        })
+                        .catch(error => console.error('Error loading the new page:', error));
+                }
+                document.getElementById("_status").textContent = "Status: " + json.status;
+                document.getElementById("_status").dataset.status = json.status;
+                document.getElementById("_deliverLocation").textContent = "Deliver to: \""+json.deliveryLocation+"\"";
+                document.getElementById("_deliverLocation").dataset.status = json.deliveryLocation;
+                if(json.currentStatusExpiry != null) {
+                    document.getElementById("_timer").hidden = null;
+                    document.getElementById("_timer").textContent = "⏰ " + new Date(json.currentStatusExpiry * 1000).toISOString().substring(14, 19);
+                } else {
+                    document.getElementById("_timer").hidden = true;
+                }
                 updateVisibility();
             } else {
                 document.getElementById("_status").textContent = "Error getting status";
                 document.getElementById("_status").dataset.status = "ERROR";
+                document.getElementById("_timer").textContent = "⏰ ??:??";
             }
         }
         request.send();
+    }
+
+    function enterCode() {
+        if(document.getElementById("_verifyCode").value.length === 4) {
+            id = new URLSearchParams(window.location.search).get("id");
+
+            const request = new XMLHttpRequest();
+            request.open("POST", "api/deliver?id="+id);
+            request.setRequestHeader("Code", document.getElementById("_verifyCode").value);
+            request.onload = async function () {
+                checkStatus();
+            }
+            request.send();
+        }
     }
 
     function updateVisibility() {
@@ -57,14 +94,17 @@
             if(element.dataset.basedonstatus === "true") {
                 element.dataset.oldstyle = element.style
                 element.style = "content-visibility:hidden;";
+                element.hidden = true;
             }
         });
         if(status === "SENDING") {
             show("step1")
         } else if(status === "PREPARING") {
             show("step2")
+            show("denyButton")
         } else if(status === "DELIVERING") {
             show("step3")
+            show("denyButton")
         } else if(status === "SOLD") {
             show("step4")
         }
@@ -72,6 +112,7 @@
 
     function show(elementId) {
         element = document.getElementById(elementId);
+        element.hidden = null;
         if(element.dataset.basedonstatus === "true" && element.style != null) {
             element.style = element.dataset.oldstyle;
         }
@@ -88,22 +129,19 @@
 
     async function acceptDelivery(event) {
         nextMode()
-        //document.getElementById("deliver").disabled = true;
-        //document.getElementById("deny").disabled = true;
-        //document.getElementById("step1").style = "content-visibility:hidden;";
-        //document.getElementById("step2").style = null;
     }
 
     function denyDelivery(event) {
         document.getElementById("denyModal").style.display = "flex";
     }
 
-    function cancelDeny() {
+    function closeDeny() {
         document.getElementById("denyModal").style.display = "none";
         document.getElementById("denyMessage").value = "";
     }
 
-    function confirmDeny() {
+    function confirmDeny(event) {
+        event.preventDefault();
         const message = document.getElementById("denyMessage").value;
 
         const request = new XMLHttpRequest();
@@ -113,7 +151,6 @@
         request.onload = async function () {
             if (request.status === 200) {
                 checkStatus()
-                done = true;
             } else {
                 alert("Error denying delivery");
             }
@@ -121,43 +158,67 @@
         request.send();
 
         document.getElementById("accept").disabled = true;
-        document.getElementById("deny").disabled = true;
+        document.getElementById("denyStep1").disabled = true;
 
-        // Close modal
-        cancelDeny();
+        closeDeny();
     }
 </script>
-<p>NOM NOM IN MAH TOM TOM</p>
+<script type="text/javascript">
+    function openHomePage() {
+        window.location.href = "http://localhost:8080/"
+    }
+</script>
+<p style="color: orangered; cursor: pointer;" onclick='openHomePage()'>NOM NOM IN MAH TOM TOM</p>
+
 <h1>Delivering</h1>
 <p id="_status">Status: PENDING</p>
 <h3>Step 1: do you wanna do it</h3>
 <div style="content-visibility:hidden;" id="step1" data-basedOnStatus="true">
     <button id="accept" onclick="acceptDelivery(event)" class="greenbutton">Accept</button>
-    <button id="deny" onclick="denyDelivery(event)" class="redbutton">Deny</button>
+    <button id="denyStep1" onclick="denyDelivery(event)" class="redbutton">Deny</button>
 </div>
 <h3>Step 2: Prepare food</h3>
 <div style="content-visibility:hidden;" id="step2" data-basedOnStatus="true">
-    <p>Checklist:</p>
     <deliveryitems></deliveryitems>
-    <button id="startDelivery" onclick="nextMode()" class="greenbutton">Deliver Food</button>
+    <button id="startDelivery" onclick="nextMode()"  class="greenbutton" style="display: block; margin: 10px auto;">Deliver Food</button>
 </div>
 <h3>Step 3: Deliver</h3>
 <div style="content-visibility:hidden;" id="step3" data-basedOnStatus="true">
-    <p>Deliver pls:</p>
+    <p id="_deliverLocation">Deliver to: </p>
+    <label>When complete, enter code here:    <input onkeyup="enterCode()" type="text" placeholder="____" id="_verifyCode" class="verificationcode"></label>
 </div>
 <h3>Step 4: Review</h3>
 <div style="content-visibility:hidden;" id="step4" data-basedOnStatus="true">
     <p>You got ⭐⭐⭐▪️▪️</p>
 </div>
+<div style="content-visibility:hidden;" id="denyButton" data-basedOnStatus="true">
+    <button id="deny" onclick="denyDelivery(event)" class="redbutton">Deny</button>
+</div>
+
+<div style="display: block; position:absolute; bottom:0; right:0; padding-right: 20px; padding-bottom: 10px">
+    <p id="_timer">TIMER</p>
+</div>
+
+<script type="text/javascript">
+    function openProfile() {
+        window.location.href = "http://localhost:8080/account"
+    }
+</script>
+<div style="display: block; position:fixed; top:10px; right:20px;">
+    <p onclick='openProfile()' style="cursor: pointer;">👤</p>
+</div>
+
 
 <div id="denyModal" class="popup" style="display:none;">
     <div  class="popup-inner" style="padding:20px; border-radius:8px; max-width:400px; width:80%;">
         <h2>Deny Delivery</h2>
-        <label>Please specify a reason for denying:<input type="text" id="denyMessage" style="width:100%;" autofocus></label>
-        <div style="margin-top:10px; text-align:right;">
-            <button onclick="cancelDeny()" class="greybutton">Cancel</button>
-            <button onclick="confirmDeny()" class="redbutton">Confirm</button>
-        </div>
+        <form onsubmit="confirmDeny(event)">
+            <label>Please specify a reason for denying:<input type="text" id="denyMessage" style="width:100%;" autofocus required></label>
+            <div style="margin-top:10px; text-align:right; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="closeDeny()" class="greybutton">Cancel</button>
+                <button type="submit" class="redbutton">Submit</button>
+            </div>
+        </form>
     </div>
 </div>
 

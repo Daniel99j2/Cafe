@@ -1,8 +1,5 @@
-package com.daniel99j;
+package com.daniel99j.cafe;
 
-import com.daniel99j.ordering.Order;
-
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class User {
@@ -10,7 +7,6 @@ public class User {
     public final long discordId;
     private String password;
     public final UUID uuid;
-    public final ArrayList<Order> orders = new ArrayList<>();
     public float balance = 0;
 
     public User(String name, long discordId, UUID uuid) {
@@ -29,5 +25,9 @@ public class User {
 
     public void setPassword(String s) {
         this.password = s;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

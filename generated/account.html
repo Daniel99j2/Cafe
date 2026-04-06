@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
+</head>
+<body>
+<script type="text/javascript">
+    function checkStatus() {
+        console.log("Checking status");
+
+        const request = new XMLHttpRequest();
+        request.open("GET", "api/account");
+        request.onload = async function () {
+            if(request.status === 200) {
+                json = JSON.parse(request.responseText);
+
+                const formatter = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                });
+                document.getElementById("_name").textContent = "Name: "+json.name;
+                document.getElementById("_balance").textContent = "Balance: "+formatter.format(json.balance);
+                document.getElementById("_discordId").textContent = "Discord ID: "+json.discordId;
+            }
+        }
+        request.send();
+    }
+
+    window.addEventListener("load", () => {
+        login();
+        setInterval(checkStatus, 10000)
+        checkStatus();
+    });
+</script>
+<script src="http://localhost:8080/password.js"></script>
+<script type="text/javascript">
+    function openHomePage() {
+        window.location.href = "http://localhost:8080/"
+    }
+</script>
+<p style="color: orangered; cursor: pointer;" onclick='openHomePage()'>NOM NOM IN MAH TOM TOM</p>
+
+<h1>Your Account</h1>
+<p title="This is the hover text!" id="_name"></p>
+<p id="_balance"></p>
+<p id="_discordId"></p>
+<script type="text/javascript">
+    function openProfile() {
+        window.location.href = "http://localhost:8080/account"
+    }
+</script>
+<div style="display: block; position:fixed; top:10px; right:20px;">
+    <p onclick='openProfile()' style="cursor: pointer;">👤</p>
+</div>
+
+</body>
+</html>

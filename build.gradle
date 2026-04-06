@@ -7,10 +7,12 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url = 'https://dj.ucc.asn.au/maven/' }
 }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
 
     implementation "com.google.code.gson:gson:2.13.2"
+    implementation "com.daniel99j:djutil:1.1"
 }

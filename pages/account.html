@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
+</head>
+<body>
+<script type="text/javascript">
+    function checkStatus() {
+        console.log("Checking status");
+
+        const request = new XMLHttpRequest();
+        request.open("GET", "api/account");
+        request.onload = async function () {
+            if(request.status === 200) {
+                json = JSON.parse(request.responseText);
+
+                const formatter = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                });
+                document.getElementById("_name").textContent = "Name: "+json.name;
+                document.getElementById("_balance").textContent = "Balance: "+formatter.format(json.balance);
+                document.getElementById("_discordId").textContent = "Discord ID: "+json.discordId;
+            }
+        }
+        request.send();
+    }
+
+    window.addEventListener("load", () => {
+        login();
+        setInterval(checkStatus, 10000)
+        checkStatus();
+    });
+</script>
+<script src="%base%/password.js"></script>
+<sitetitle></sitetitle>
+<h1>Your Account</h1>
+<p title="This is the hover text!" id="_name"></p>
+<p id="_balance"></p>
+<p id="_discordId"></p>
+<usericon></usericon>
+</body>
+</html>

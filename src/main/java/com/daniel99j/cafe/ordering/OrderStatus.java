@@ -1,4 +1,4 @@
-package com.daniel99j.ordering;
+package com.daniel99j.cafe.ordering;
 
 public enum OrderStatus {
     SENDING,

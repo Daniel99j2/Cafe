@@ -1,9 +1,6 @@
-package com.daniel99j.site;
-
-import com.daniel99j.Items;
+package com.daniel99j.cafe.site;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class CartDataElement extends ElementParser {
     private static final ArrayList<String> additions = new ArrayList<>();

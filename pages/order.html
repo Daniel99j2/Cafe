@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Store</title>
+    <title>Order Status</title>
     <link rel="stylesheet" href="main.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
 </head>
 <body>
 <script type="text/javascript">
     currentSpinner = 0;
     iter = 0;
     textIter = 0;
+    authorized = false;
     done = false;
 
     function cancelOrder() {
@@ -30,23 +32,34 @@
         request.open("GET", "api/order?id="+id);
         request.onload = async function () {
             if(request.status === 200) {
-                if(request.responseText.split(":")[1] === "AUTHORIZED" && request.responseText.split(":")[0] === "SENDING") {
+                json = JSON.parse(request.responseText);
+                authorized = json.authorization;
+
+                if(authorized && json.status === "SENDING") {
                     document.getElementById("_cancelOrder").disabled = null;
                 } else {
                     document.getElementById("_cancelOrder").disabled = true;
                 }
-                document.getElementById("_status").textContent = "Status: " + request.responseText.split(":")[0];
-                document.getElementById("_status").dataset.status = request.responseText.split(":")[0];
 
-                if(request.responseText.split(":")[0] === "FAILED") {
-                    document.getElementById("_failReason").textContent = "Fail reason: \"" +request.responseText.split(":")[2] + "\""
+                if(authorized && json.status === "DELIVERING") {
+                    document.getElementById("_verifyCode").hidden = null;
+                    document.getElementById("_verifyCode").textContent = "Verification code: "+json.verificationCode;
+                } else {
+                    document.getElementById("_verifyCode").hidden = "hidden";
+                }
+
+                document.getElementById("_status").textContent = "Status: " + json.status;
+                document.getElementById("_status").dataset.status = json.status;
+
+                if(json.status === "FAILED") {
+                    document.getElementById("_failReason").textContent = "Reason: \"" +json.failReason + "\""
                     document.getElementById("_failReason").hidden = null
                 }
 
-                if(request.responseText.split(":")[0] === "CANCELLED" || request.responseText.split(":")[0] === "FAILED" || request.responseText.split(":")[0] === "SOLD") {
+                if(json.status === "CANCELLED" || json.status === "FAILED" || json.status === "SOLD") {
                     done = true
                     document.getElementById("_spinner").textContent = "Order complete"
-                };
+                }
             } else {
                 document.getElementById("_status").textContent = "Error getting status";
                 document.getElementById("_status").dataset.status = "ERROR";
@@ -84,14 +97,13 @@
 
     setInterval(makeSpinnerSwirl, 500)
 </script>
-<script type="text/javascript"></script>
-<p>NOM NOM IN MAH TOM TOM</p>
+<sitetitle></sitetitle>
 <h1>Your order</h1>
 <p id="_status">Status: PENDING</p>
 <p id="_failReason" hidden="hidden">Fail Reason</p>
 <p id="_spinner">Preparing order.</p>
+<p id="_verifyCode" hidden="hidden">Verification code</p>
 <button class="redbutton" id="_cancelOrder" onclick="cancelOrder()" disabled>Cancel Order</button>
-<script type="text/javascript">
-</script>
+<usericon></usericon>
 </body>
 </html>

@@ -1,6 +1,6 @@
-package com.daniel99j.ordering;
+package com.daniel99j.cafe.ordering;
 
-import com.daniel99j.Item;
+import com.daniel99j.cafe.Item;
 
 public class OrderItem {
     public final Item item;

@@ -1,15 +1,82 @@
 :root {
-    --primary: #a855f7;
-    --secondary: #ec4899;
-    --accent: #06b6d4;
+    --primary: orange;
+    --secondary: orangered;
+    --accent: lightgoldenrodyellow;
     --bg-dark: #09090b;
     --bg-card: #18181b;
     --text: #fafafa;
     --text-muted: #71717a;
+    --input-bg: #2d2d34;
+    --input-border: #4b4b57;
+    --input-focus-border: orangered;
 }
 
+* {
+    transition: all 0.3s ease;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.cart {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: var(--bg-dark);
+    color: var(--text);
+    padding: 15px;
+    justify-content: space-between; /* Distribute space between content */
+    width: 100%;
+    border-radius: 6px;
+}
+
+.item p {
+    margin-right: 10px;
+    flex: 1;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* removes the up down arrows */
+.itemamount[type="number"]::-webkit-outer-spin-button,
+.itemamount[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.itemamount[type="number"] {
+    width: 30px;
+    padding: 8px;
+    margin: 0 5px;
+    border: 2px solid var(--input-border);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text);
+    font-size: 16px;
+    text-align: center;  /* Horizontally center the number */
+    line-height: 1.5;  /* Vertically center the number */
+}
+
+
 body {
-    min-height: 100vh;
     background: var(--bg-dark);
     font-family: 'Inter', system-ui, sans-serif;
     color: var(--text);
@@ -46,7 +113,7 @@ body {
 }
 
 .greenbutton:disabled,
-.greenbutton[disabled]{
+.greenbutton[disabled] {
     background-color: #025d3b;
     color: gray;
     cursor: not-allowed;
@@ -67,9 +134,71 @@ body {
 }
 
 .redbutton:disabled,
-.redbutton[disabled]{
+.redbutton[disabled] {
     background-color: #5d0202;
     color: gray;
+    cursor: not-allowed;
+}
+
+.greybutton {
+    background-color: #aaaaaa;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.greybutton:disabled,
+.greybutton[disabled] {
+    background-color: #5e5e5e;
+    color: gray;
+    cursor: not-allowed;
+}
+
+.purchasebutton {
+    background-color: var(--secondary);
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.purchasebutton:disabled,
+.purchasebutton[disabled] {
+    background-color: var(--input-bg);
+    color: gray;
+    cursor: not-allowed;
+}
+
+.moreless {
+    background-color: transparent;
+    border: 2px solid var(--input-border);
+    color: var(--text);
+    font-size: 16px;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+}
+
+.moreless:hover {
+    background-color: var(--input-border);
+}
+
+.moreless:disabled {
+    background-color: #5e5e5e;
     cursor: not-allowed;
 }
 
@@ -83,7 +212,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.5); /*It makes it transparent black*/
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .popup-inner {
@@ -93,4 +222,73 @@ body {
     width: 80%;
     background-color: var(--bg-card);
     display: block;
+}
+
+input {
+    width: 100%;
+    padding: 12px 16px;
+    margin: 8px 0;
+    border: 2px solid var(--input-border);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--text);
+    font-size: 16px;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--input-focus-border);
+    background-color: #222227;
+}
+
+input::placeholder {
+    color: var(--text-muted);
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+.verificationcode {
+    width: 50px;
+    text-align: center;
+}
+
+/* Style for the dropdown to resemble a text input */
+select {
+    width: 100%;
+    padding: 12px 16px;
+    margin: 8px 0;
+    border: 2px solid var(--input-border);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--text);
+    font-size: 16px;
+    appearance: none; /* removes the arrow */
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--input-focus-border);
+    background-color: #222227;
+}
+
+select::placeholder {
+    color: var(--text-muted);
+}
+
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-wrapper::after {
+    content: '\25BC'; /* triangle arrow */
+    font-size: 16px;
+    color: var(--text-muted);
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
 }

@@ -1,10 +1,11 @@
-package com.daniel99j.site;
+package com.daniel99j.cafe.site.handler;
 
-import com.daniel99j.User;
-import com.daniel99j.UserLoader;
-import com.daniel99j.ordering.Order;
-import com.daniel99j.ordering.OrderManager;
-import com.daniel99j.ordering.OrderStatus;
+import com.daniel99j.cafe.User;
+import com.daniel99j.cafe.UserLoader;
+import com.daniel99j.cafe.ordering.Order;
+import com.daniel99j.cafe.ordering.OrderItem;
+import com.daniel99j.cafe.ordering.OrderManager;
+import com.daniel99j.cafe.ordering.OrderStatus;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -23,16 +24,26 @@ public class DeliverApiHandler implements HttpHandler {
 
             if(exchange.getRequestMethod().equals("DELETE")) {
                 if(o.deliverer == user) {
-                    o.status = OrderStatus.FAILED;
                     o.failReason = exchange.getRequestHeaders().getFirst("FailReason");
+                    o.setStatus(OrderStatus.FAILED);
                 }
-                else if(o.orderer == user) o.status = OrderStatus.CANCELLED;
+                else if(o.orderer == user && o.getStatus() == OrderStatus.SENDING) o.setStatus(OrderStatus.CANCELLED);
                 else throw new IllegalArgumentException("Incorrect user");
             } else if(exchange.getRequestMethod().equals("PUT")) {
-                if(o.status == OrderStatus.SENDING) o.status = OrderStatus.PREPARING;
-                else if(o.status == OrderStatus.PREPARING) o.status = OrderStatus.DELIVERING;
-                else if(o.status == OrderStatus.DELIVERING) o.status = OrderStatus.SOLD;
+                if(o.getStatus() == OrderStatus.SENDING) o.setStatus(OrderStatus.PREPARING);
+                else if(o.getStatus() == OrderStatus.PREPARING) o.setStatus(OrderStatus.DELIVERING);
                 else throw new IllegalArgumentException("Invalid status");
+            } else if(exchange.getRequestMethod().equals("POST") && o.deliverer == user && o.getStatus() == OrderStatus.DELIVERING) {
+                if(exchange.getRequestHeaders().getFirst("Code").equals(o.verificationCode)) {
+                    o.setStatus(OrderStatus.SOLD);
+                    for (OrderItem item : o.items) {
+                        o.deliverer.balance+=item.quantity*item.item.prepareValue;
+                        o.deliverer.balance+=item.quantity*item.item.price;
+
+                        o.orderer.balance-=item.quantity*item.item.price;
+                    }
+                }
+                else throw new IllegalArgumentException("Invalid code");
             } else throw new IllegalArgumentException("Invalid request");
 
             exchange.sendResponseHeaders(200, response.getBytes().length);

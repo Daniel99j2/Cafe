@@ -1,11 +1,11 @@
-package com.daniel99j.site;
+package com.daniel99j.cafe.site.handler;
 
-import com.daniel99j.Items;
-import com.daniel99j.User;
-import com.daniel99j.UserLoader;
-import com.daniel99j.ordering.Order;
-import com.daniel99j.ordering.OrderItem;
-import com.daniel99j.ordering.OrderManager;
+import com.daniel99j.cafe.Items;
+import com.daniel99j.cafe.User;
+import com.daniel99j.cafe.UserLoader;
+import com.daniel99j.cafe.ordering.Order;
+import com.daniel99j.cafe.ordering.OrderItem;
+import com.daniel99j.cafe.ordering.OrderManager;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,8 +14,6 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 
 public class PurchaseApiHandler implements HttpHandler {
@@ -32,22 +30,16 @@ public class PurchaseApiHandler implements HttpHandler {
             for (JsonElement cart : object.get("cart").getAsJsonArray()) {
                 JsonObject item = cart.getAsJsonObject();
                 int amount = item.get("quantity").getAsInt();
-                if(amount > 0) items.add(new OrderItem(Items.items.get(item.get("name").getAsString()), amount));
+                if(amount <= 0) throw new IllegalArgumentException("Amount cannot be negative or zero");
+                if(amount > 10) throw new IllegalArgumentException("Amount cannot be greater than 10");
+                items.add(new OrderItem(Items.items.get(item.get("name").getAsString()), amount));
             }
 
             if(items.isEmpty()) throw new IllegalArgumentException("No items");
 
-            float cost = 0;
+            User deliverer = UserLoader.getUser(object.get("deliverer").getAsString());
 
-            for (OrderItem item : items) {
-                cost += item.quantity*item.item.price;
-            }
-
-            if(cost <= 0) throw new IllegalArgumentException("Too cheap");
-
-            Order order = new Order(cost, items, user, UserLoader.getUser("Hugo"), object.get("deliveryLocation").getAsString());
-
-            order.currentStatusExpiry = Instant.now().plus(Duration.ofMinutes(2));
+            Order order = new Order(items, user, deliverer, object.get("deliveryLocation").getAsString());
 
             OrderManager.addOrder(order);
 
